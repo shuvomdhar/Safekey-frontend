@@ -104,6 +104,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session, refresh]);
 
   const signOut = useCallback(async () => {
+    // Best effort: mark the profile inactive before the token is discarded.
+    try {
+      await api.post("/api/auth/logout");
+    } catch {
+      // Signing out locally still matters more than the presence flag.
+    }
+
     try {
       await supabase.auth.signOut();
     } catch {
